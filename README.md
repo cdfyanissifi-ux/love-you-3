@@ -4,7 +4,6 @@
   <title>Love Forever</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* --- Base page --- */
     body {
       background: #000;
       height: 100vh;
@@ -13,7 +12,7 @@
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
-    /* --- Quick links (translated) --- */
+    /* --- Quick links --- */
     .quick-link {
       position: fixed;
       right: 10px;
@@ -30,10 +29,10 @@
       font-size: 13px;
       user-select: none;
     }
-    .quick-link:nth-of-type(1) { top: 10%; }  /* Create */
-    .quick-link:nth-of-type(2) { top: 4%;  z-index: 998; }  /* More */
-    .quick-link:nth-of-type(3) { top: 16%; z-index: 997; }  /* Source Code */
-    .quick-link:nth-of-type(4) { top: 22%; z-index: 996; }  /* Gift */
+    .quick-link:nth-of-type(1) { top: 10%; }
+    .quick-link:nth-of-type(2) { top: 4%;  z-index: 998; }
+    .quick-link:nth-of-type(3) { top: 16%; z-index: 997; }
+    .quick-link:nth-of-type(4) { top: 22%; z-index: 996; }
 
     /* --- Love words --- */
     #ui .love {
@@ -41,21 +40,13 @@
       top: 50%;
       left: 50%;
       margin: -225px 0 0 -225px;
-      /* per-item delay via CSS variable --i (1..N) */
       --i: 1;
     }
     #ui .love:last-child .love_word {
-      color: #fff;
-      font-size: 2rem;
-      text-shadow: 0 0 10px #ea80b0;
+      color: #ea80b0;
+      font-size: 1.4rem;
+      text-shadow: 0 0 10px #fff;
     }
-    /* Make the last item match the others */
-#ui .love:last-child .love_word {
-  color: #ea80b0;
-  font-size: 1.4rem;
-  text-shadow: 0 0 10px #fff;
-}
-
     #ui .love_word {
       color: #ea80b0;
       font-size: 1.4rem;
@@ -73,7 +64,6 @@
       animation-delay: calc(var(--i) * -300ms);
     }
 
-    /* --- Animations (unchanged) --- */
     @keyframes horizontal {
       from { transform: translateX(0px); }
       to   { transform: translateX(450px); }
@@ -101,38 +91,136 @@
       79%  { transform: translateY(428.57143px); }
       100% { transform: translateY(180px); }
     }
+
+    /* --- Bouton démarrage musique --- */
+    #music-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      transition: opacity 0.8s ease;
+    }
+    #music-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #start-btn {
+      background: transparent;
+      border: 2px solid #ea80b0;
+      color: #ea80b0;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 16px 40px;
+      border-radius: 50px;
+      cursor: pointer;
+      text-shadow: 0 0 10px #ea80b0;
+      box-shadow: 0 0 20px #ea80b066, inset 0 0 20px #ea80b011;
+      transition: all 0.3s ease;
+      animation: pulse-btn 2s infinite;
+    }
+    #start-btn:hover {
+      background: #ea80b022;
+      box-shadow: 0 0 40px #ea80b0aa, inset 0 0 30px #ea80b033;
+    }
+    @keyframes pulse-btn {
+      0%, 100% { box-shadow: 0 0 20px #ea80b066, inset 0 0 20px #ea80b011; }
+      50%       { box-shadow: 0 0 40px #ea80b0aa, inset 0 0 30px #ea80b033; }
+    }
+
+    /* --- Bouton mute (affiché après démarrage) --- */
+    #mute-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: transparent;
+      border: 1px solid #ea80b055;
+      color: #ea80b0;
+      font-size: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      opacity: 0.6;
+    }
+    #mute-btn:hover { opacity: 1; border-color: #ea80b0; }
+    #mute-btn.visible { display: flex; }
   </style>
 </head>
 <body>
 
+  <!-- Overlay de démarrage -->
+  <div id="music-overlay">
+    <button id="start-btn">♥ Entrer ♥</button>
+  </div>
+
+  <!-- Bouton mute/unmute -->
+  <button id="mute-btn" title="Mute / Unmute">🔊</button>
+
+  <!-- Élément audio — remplacez src par l'URL de votre musique -->
+  <audio id="bg-music" loop preload="auto">
+    <source src="inmark.mp3" type="audio/mpeg">
+  </audio>
 
   <div id="ui"></div>
 
   <script>
-    // Create N floating “I love you” items (was multilingual; now all English)
-    const N = 100;     // adjust if you want fewer/more
+    // ── Génération des "I love you" flottants ──
+    const N = 100;
     const ui = document.getElementById('ui');
-
     for (let i = 1; i <= N; i++) {
       const love = document.createElement('div');
       love.className = 'love';
       love.style.setProperty('--i', i);
-
       const h = document.createElement('div');
       h.className = 'love_horizontal';
-
       const v = document.createElement('div');
       v.className = 'love_vertical';
-
       const word = document.createElement('div');
       word.className = 'love_word';
       word.textContent = 'I love you';
-
       v.appendChild(word);
       h.appendChild(v);
       love.appendChild(h);
       ui.appendChild(love);
     }
+
+    // ── Musique en boucle ──
+    const audio    = document.getElementById('bg-music');
+    const overlay  = document.getElementById('music-overlay');
+    const startBtn = document.getElementById('start-btn');
+    const muteBtn  = document.getElementById('mute-btn');
+
+    // L'attribut "loop" sur <audio> gère déjà la boucle infinie.
+    // On le laisse en secours + on écoute "ended" au cas où.
+    audio.loop = true;
+    audio.addEventListener('ended', () => audio.play());
+
+    startBtn.addEventListener('click', () => {
+      audio.play().then(() => {
+        // Cache l'overlay avec un fondu
+        overlay.classList.add('hidden');
+        setTimeout(() => overlay.style.display = 'none', 900);
+        muteBtn.classList.add('visible');
+      }).catch(err => {
+        console.warn('Lecture audio refusée :', err);
+      });
+    });
+
+    // Mute / Unmute
+    muteBtn.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      muteBtn.textContent = audio.muted ? '🔇' : '🔊';
+    });
   </script>
 </body>
 </html>
