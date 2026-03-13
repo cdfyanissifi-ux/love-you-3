@@ -138,7 +138,7 @@
 <div id="ui"></div>
 
 <div id="music-overlay">
-  <div class="overlay-title">Love Forever</div>
+  <div class="overlay-title">My Love For You</div>
   <button id="start-btn">&#9829; Entrer &#9829;</button>
 </div>
 
